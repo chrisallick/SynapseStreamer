@@ -1,0 +1,9 @@
+html, body { width: 100%; height: 100%; }
+
+@font-face { font-family: "brownstdreg"; src: url("../font/brown.std.reg.otf"); }
+
+#wrapper { width: 100%; opacity: 0; }
+
+#tweets .tweet { font: normal 18px "brownstdreg"; color: #55acee; }
+#tweets .tweet.meta { color: #000000; }
+#tweets .tweet.image { color: red; }
