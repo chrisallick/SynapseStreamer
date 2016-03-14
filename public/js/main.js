@@ -25,6 +25,8 @@ function newTweets(tweets) {
 			t = "<p class='tweet meta'>"+tweets[i].text+"</p>";
 		} else if( tweets[i].type == "image" ) {
 			t = "<p class='tweet image'>"+tweets[i].text+"</p>";
+		} else if( tweets[i].type == "random" ) {
+			t = "<p class='tweet random'>"+tweets[i].text+"</p>";
 		}
 		
 		$("#tweets").append( t );
@@ -40,5 +42,6 @@ $(window).load(function(){
 $(document).ready(function() {
 	// true: load from snapshot.json
 	// false: rebuild the data
-	fetchTweets(true);
+	//fetchTweets(true);
+	fetchTweets(false);
 });

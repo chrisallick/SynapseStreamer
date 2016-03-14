@@ -28,6 +28,11 @@ twitter_people = [
 	"washingtonpost"
 ]
 
+twitter_terms = [
+	"neuroscience",
+	"neuron"
+]
+
 get '/' do
     erb :main, :layout => :main_layout, :locals => {
 
@@ -51,46 +56,60 @@ get '/twitter/' do
 			# if !t
 				t_text = tweet.text
 				t_name = tweet.user.screen_name
-				
-				tweet_obj = { :text => t_text, :name => t_name, :type => "tweet" }
-				tweets.push( tweet_obj )
 
-				# $redis.set("syntweet:#{t_id}", tweet_object.to_json)
+				if twitter_terms.any? { |word| t_text.include?(word) }
+					tweet_obj = { :text => t_text, :name => t_name, :type => "tweet" }
+					tweets.push( tweet_obj )
 
-				puts "found tweet... stored."
+					# $redis.set("syntweet:#{t_id}", tweet_object.to_json)
 
-				if tweet.entities? and tweet.urls?
-					puts "checking for linked URLs..."
-					tweet.urls.each do |url|
-						begin
-						  page = MetaInspector.new(url.expanded_url, faraday_options: { ssl: { verify: false } })
-						rescue Faraday::RedirectLimitReached
-						else
-							if page.meta['description']
-								tweet_obj = { :text => page.meta['description'], :name => t_name, :type => "meta" }
+					puts "found tweet... stored."
+
+					if tweet.entities? and tweet.urls?
+						puts "checking for linked URLs..."
+						tweet.urls.each do |url|
+							begin
+							  page = MetaInspector.new(url.expanded_url, faraday_options: { ssl: { verify: false } })
+							rescue Faraday::RedirectLimitReached
+							else
+								if page.meta['og:description']
+									tweet_obj = { :text => page.meta['og:description'], :name => t_name, :type => "meta" }
+									tweets.push( tweet_obj )
+									puts "found og:description... stored."
+								elsif page.meta['description']
+									tweet_obj = { :text => page.meta['description'], :name => t_name, :type => "meta" }
+									tweets.push( tweet_obj )
+									puts "found description... stored."
+								end
+							end
+						end
+					elsif tweet.media?
+						puts "checking for images..."
+						tweet.media.each do |media|
+							if media.to_hash[:type] == "photo"
+								tweet_obj = { :text => media.media_url, :name => t_name, :type => "image" }
 								tweets.push( tweet_obj )
-								puts "found description... stored."
-							elsif page.meta['og:description']
-								tweet_obj = { :text => page.meta['og:description'], :name => t_name, :type => "meta" }
-								tweets.push( tweet_obj )
-								puts "found og:description... stored."
+								puts "found image url... stored."
 							end
 						end
 					end
-				elsif tweet.media?
-					puts "checking for images..."
-					tweet.media.each do |media|
-						if media.to_hash[:type] == "photo"
-							tweet_obj = { :text => media.media_url, :name => t_name, :type => "image" }
-							tweets.push( tweet_obj )
-							puts "found image url... stored."
-						end
-					end
 				end
+				
 			# end
 		end
 
 		sleep 0.250
+	end
+
+	twitter_terms.each do |term|
+		twitter_client.search(term, lang: "en", result_type: "recent").take(20).collect do |tweet|
+			t_id = tweet.id
+			t_text = tweet.text
+			t_name = tweet.user.screen_name
+
+			tweet_obj = { :text => t_text, :name => t_name, :type => "random" }
+			tweets.push( tweet_obj )
+		end
 	end
 
 	data = { :result => "success", :tweets => tweets }.to_json

@@ -7,3 +7,4 @@ html, body { width: 100%; height: 100%; }
 #tweets .tweet { font: normal 18px "brownstdreg"; color: #55acee; }
 #tweets .tweet.meta { color: #000000; }
 #tweets .tweet.image { color: red; }
+#tweets .tweet.random { color: salmon; }
