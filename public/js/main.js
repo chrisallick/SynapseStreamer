@@ -1,18 +1,17 @@
 function fetchTweets(snapshot) {
+	var endpoint;
+
 	if( !snapshot ) {
-		$.get('/twitter/', function(resp) {
-			if( resp && resp.result && resp.result == "success" ) {
-				newTweets(resp.tweets);
-			}
-		}, "json");		
+		endpoint = "/twitter/";
 	} else {
-		$.get('/snapshot.json', function(resp) {
-			if( resp && resp.result && resp.result == "success" ) {
-				newTweets(resp.tweets);
-				//console.log( resp );
-			}
-		}, "json");		
+		endpoint = "/snapshot.json";
 	}
+
+	$.get(endpoint, function(resp) {
+		if( resp && resp.result && resp.result == "success" ) {
+			newTweets(resp.tweets);
+		}
+	}, "json");
 }
 
 function newTweets(tweets) {
