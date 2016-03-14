@@ -30,7 +30,9 @@ twitter_people = [
 
 twitter_terms = [
 	"neuroscience",
-	"neuron"
+	"neuron",
+	"neurons",
+	"brain"
 ]
 
 get '/' do
@@ -47,7 +49,7 @@ get '/twitter/' do
 	twitter_people.each do |person|
 		puts "checking twitter of: #{person}"
 
-		search_results = twitter_client.user_timeline(person, {:count => 4})
+		search_results = twitter_client.user_timeline(person, {:count => 10})
 
 		search_results.each do |tweet|
 			t_id = tweet.id
@@ -102,7 +104,7 @@ get '/twitter/' do
 	end
 
 	twitter_terms.each do |term|
-		twitter_client.search(term, lang: "en", result_type: "recent").take(20).collect do |tweet|
+		twitter_client.search(term, lang: "en", result_type: "recent").take(4).collect do |tweet|
 			t_id = tweet.id
 			t_text = tweet.text
 			t_name = tweet.user.screen_name
